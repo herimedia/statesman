@@ -108,8 +108,9 @@ module Statesman
       def serialized?(transition_class)
         if ::ActiveRecord.respond_to?(:gem_version) &&
            ::ActiveRecord.gem_version >= Gem::Version.new('4.2.0.a')
-          transition_class.columns_hash["metadata"].
-            cast_type.is_a?(::ActiveRecord::Type::Serialized)
+          transition_class.connection.lookup_cast_type(
+            transition_class.columns_hash["metadata"].sql_type
+          ).is_a?(::ActiveRecord::Type::Serialized)
         else
           transition_class.serialized_attributes.include?("metadata")
         end
